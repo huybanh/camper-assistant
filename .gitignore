@@ -1,0 +1,6 @@
+.ha_run.lock
+.HA_VERSION
+home-assistant.log.fault
+.storage
+home-assistant_v2.db*
+scenes.yaml
