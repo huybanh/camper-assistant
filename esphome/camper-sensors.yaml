@@ -1,5 +1,5 @@
 esphome:
-  name: main_sensors
+  name: "camper-sensors"
   friendly_name: Camper Sensors
 
 esp8266:

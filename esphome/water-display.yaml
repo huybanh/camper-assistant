@@ -42,6 +42,9 @@ globals:
   - id: time_counter
     type: int
     initial_value: '0'
+  - id: water_temp_last_update_ts
+    type: float
+    initial_value: '0'
 
 number:
   - platform: template
@@ -53,61 +56,17 @@ number:
     step: 1
     optimistic: True
 
-
 debug:
   update_interval: 5s
 
-text_sensor:
-  - !include { file: text_sensor_debug.yaml }
-
-sensor:
-  - !include { file: sensor_debug.yaml } 
-  - platform: wifi_signal
-    # name: "WiFi Signal Sensor"
-    internal: True
-    id: wifi_signal_sensor
-    update_interval: 1s
-  - platform: uptime
-    id: uptime_counter
-    update_interval: 1s
-    accuracy_decimals: 0
-    on_raw_value:
-      then:
-        #- light.turn_on:
-        #    id: back_light
-        #    brightness: 50%
-        - number.increment:
-            id: counting_number
-            cycle: True
-        - script.execute: update_display
-
-  - platform: homeassistant
-    id: ha_water_temp
-    entity_id: sensor.first_8266_camper_temperature
-    #internal: True
-    on_value:
-      then:
-          - lvgl.label.update:
-              id: label_temp
-              text: !lambda
-                float sensor_value = id(ha_water_temp).state;
-                char buffer[32];
-                sprintf(buffer, "%.1f", sensor_value);
-                return {std::string(buffer)};
-
-    on_value_range:
-      - above: 0.0
-        then:
-          #- lvgl.label.update:
-          #    id: battery_charging_discharging
-          #    text_color: 0x00FF00
-          #    text: "charging"
-      - below: 0.0
-        then:
-
 spi:
   clk_pin: GPIO6
-  mosi_pin: GPIO7
+  mosi_pin: GPIO7  
+
+i2c:
+  sda: 4
+  scl: 5
+  id: i2c_touch
 
 output:
   - platform: ledc
@@ -140,12 +99,56 @@ display:
 
 #time:
 #  - platform: homeassistant
-#    id: time_comp     
+#    id: time_comp   
 
-i2c:
-  sda: 4
-  scl: 5
-  id: i2c_touch
+text_sensor:
+  - !include { file: text_sensor_debug.yaml }
+
+sensor:
+  - !include { file: sensor_debug.yaml } 
+  - platform: wifi_signal
+    # name: "WiFi Signal Sensor"
+    internal: True
+    id: wifi_signal_sensor
+    update_interval: 1s
+  - platform: uptime
+    id: uptime_counter
+    update_interval: 1s
+    accuracy_decimals: 0
+    on_raw_value:
+      then:
+        #- light.turn_on:
+        #    id: back_light
+        #    brightness: 50%
+        - number.increment:
+            id: counting_number
+            cycle: True
+        #- script.execute: update_display_temp
+
+  - platform: homeassistant
+    id: ha_water_temp
+    entity_id: sensor.first_8266_camper_temperature
+    #internal: True
+    on_value:
+      then:
+          - script.execute: update_display_temp
+          #- lvgl.label.update:
+          #    id: label_temp
+          #    text: !lambda
+          #      float sensor_value = id(ha_water_temp).state;
+          #      char buffer[32];
+          #      sprintf(buffer, "%.1f", sensor_value);
+          #      return {std::string(buffer)};
+
+    on_value_range:
+      - above: 0.0
+        then:
+          #- lvgl.label.update:
+          #    id: battery_charging_discharging
+          #    text_color: 0x00FF00
+          #    text: "charging"
+      - below: 0.0
+        then:
 
 <<: !include { file: water-display-lvgl.yaml }
 

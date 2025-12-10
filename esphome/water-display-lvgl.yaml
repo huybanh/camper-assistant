@@ -1,5 +1,5 @@
 script:
-  - id: update_display
+  - id: update_display_temp
     then:
       #- lvgl.indicator.line.update:
       #    id: indicator_battery_power
@@ -10,6 +10,15 @@ script:
       #      format: "%.1f%%"
       #      args: [ 'id(counting_number).state' ]
 
+      - lvgl.label.update:
+          id: label_temp
+          text:
+            format: "%.1f%%"
+            args: [ "id(ha_water_temp).state" ]
+            #float sensor_value = id(ha_water_temp).state;
+            #char buffer[32];
+            #sprintf(buffer, "%.1f", sensor_value);
+            #return {std::string(buffer)};
 
       #- lvgl.img.update:
           #id: img_power
