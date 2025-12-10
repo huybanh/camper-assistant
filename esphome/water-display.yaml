@@ -58,22 +58,10 @@ debug:
   update_interval: 5s
 
 text_sensor:
-  - platform: debug
-    device:
-      name: "Device Info"
-    reset_reason:
-      name: "Reset Reason"
+  - !include { file: text_sensor_debug.yaml }
 
 sensor:
-  - platform: debug
-    free:
-      name: "Heap Free"
-    block:
-      name: "Heap Max Block"
-    loop_time:
-      name: "Loop Time"
-    #psram:
-    #  name: "Free PSRAM"
+  - !include { file: sensor_debug.yaml } 
   - platform: wifi_signal
     # name: "WiFi Signal Sensor"
     internal: True
@@ -152,155 +140,14 @@ display:
 
 #time:
 #  - platform: homeassistant
-#    id: time_comp
-
-script:
-  - id: update_display
-    then:
-      #- lvgl.indicator.line.update:
-      #    id: indicator_battery_power
-      #    value: !lambda return id(counting_number).state * 10; #multiply by 10 because LVGL meter only supports integers
-      #- lvgl.label.update:
-      #    id: label_battery_soc
-      #    text:
-      #      format: "%.1f%%"
-      #      args: [ 'id(counting_number).state' ]
-
-
-      #- lvgl.img.update:
-          #id: img_power
-          #src: power_icon
-          #img_recolor: 0xFFF000 #mixes this color with the base image
-          #img_recolor_opa: 100% #opacity defaults to 0% = must set this for recolor to take effect
-          #bg_color: 0xFFFFFF          
+#    id: time_comp     
 
 i2c:
   sda: 4
   scl: 5
   id: i2c_touch
 
-touchscreen:
-  platform: cst816
-  id: my_touchscreen
-  interrupt_pin: 0
-  reset_pin: 1
-  on_touch:
-    then:
-      lvgl.page.next:
-
-font:
-  - file: "fonts/GoogleSans-Medium.ttf"
-    id: big_font
-    size: 60
-    bpp: 2
-  - file: "fonts/GoogleSans-Medium.ttf"
-    id: small_font
-    size: 30
-    bpp: 2
-
-  - file: "fonts/GoogleSans-Medium.ttf"
-    id: xs_font
-    size: 20
-    bpp: 2
-
-lvgl:
-    touchscreens: my_touchscreen
-    log_level: INFO
-    color_depth: 16
-    bg_color: 0
-    border_width: 0
-    outline_width: 0
-    #shadow_width: 0
-    text_font: unscii_16
-    align: center
-    style_definitions:
-      - id: font_style
-        text_font: MONTSERRAT_28
-        #text_font: unscii_16
-        align: center
-        text_color: 0x0
-        #bg_opa: cover
-        bg_opa: TRANSP
-        bg_color: 0
-        radius: 4
-        pad_all: 2 
-        
-    page_wrap: true
-    pages:
-      - id: main_page
-        widgets:
-          - obj: # Meter
-              height: 240 # needed to be explicitily defined for my round display to not have weird border line overlapping gauge
-              width: 240
-              align: center
-              bg_color: 0xFFFFFF
-              #bg_opa: TRANSP
-              border_width: 0
-              outline_width: 0
-              #shadow_width: 0
-              pad_all: 0
-              scrollbar_mode: "off"
-              clip_corner: true
-              radius: 120
-              widgets:
-                - label:
-                    styles: font_style
-                    id: label_current_use
-                    text_font: small_font
-                    y: -40
-                    x: -50
-                    text: 3.2
-                    text_align: RIGHT
-                - label:
-                    styles: font_style
-                    text_font: xs_font
-                    y: -50
-                    x: -20
-                    text: L
-                - label:
-                    styles: font_style
-                    id: label_remain
-                    text_font: small_font
-                    y: -40
-                    x: 45
-                    text: 142
-                - label:
-                    styles: font_style
-                    text_font: xs_font
-                    y: -50
-                    x: 75
-                    text: L
-                - label:
-                    styles: font_style
-                    id: label_temp
-                    text_font: big_font
-                    y: 20
-                    text: "..."
-                - label:
-                    styles: font_style
-                    text_font: xs_font
-                    y: -5
-                    x: 75
-                    text: "°C"
-                - bar:
-                    x: 60
-                    y: 185
-                    id: bar_id
-                    value: 20
-                    min_value: 10
-                    max_value: 40
-                    width: 120
-                    indicator:
-                      bg_color: 0xF54927
-
-      - id: advanced
-        widgets:
-          - label:
-              styles: font_style
-              text_font: MONTSERRAT_18 # override font size
-              y: 0 #negative = higher
-              x: 0
-              text: "Settings Page"
+<<: !include { file: water-display-lvgl.yaml }
 
 
 
