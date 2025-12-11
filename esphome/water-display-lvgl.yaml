@@ -12,9 +12,11 @@ script:
 
       - lvgl.label.update:
           id: label_temp
-          text:
-            format: "%.1f%%"
-            args: [ "id(ha_water_temp).state" ]
+          text: !lambda return id(global_water_temp_validated);
+          #text:
+          #  format: "%.1f%"
+          #  args: [ "id(ha_water_temp).state" ]
+          #text: !lambda |-
             #float sensor_value = id(ha_water_temp).state;
             #char buffer[32];
             #sprintf(buffer, "%.1f", sensor_value);
@@ -123,7 +125,7 @@ lvgl:
                     id: label_temp
                     text_font: big_font
                     y: 20
-                    text: "..."
+                    text: "--"
                 - label:
                     styles: font_style
                     text_font: xs_font
