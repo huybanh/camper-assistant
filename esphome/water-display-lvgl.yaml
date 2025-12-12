@@ -12,7 +12,7 @@ script:
 
       - lvgl.label.update:
           id: label_temp
-          text: !lambda return id(global_water_temp_validated);
+          text: !lambda return id(watertemp_sanitized);
           #text:
           #  format: "%.1f%"
           #  args: [ "id(ha_water_temp).state" ]

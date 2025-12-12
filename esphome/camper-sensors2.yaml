@@ -1,9 +1,9 @@
 esphome:
-  name: "camper-sensors"
-  friendly_name: Camper Sensors
+  name: camper-sensors2
+  friendly_name: camper-sensors2
 
 esp8266:
-  board: d1_mini
+  board: esp01_1m
 
 # Enable logging
 logger:
@@ -11,26 +11,40 @@ logger:
 # Enable Home Assistant API
 api:
   encryption:
-    key: "lay6SIF7JfXEWFqlsV/gGo0Zjvx9sP3cjVbWHuOMoLQ="
+    key: "4oZ1DNLfgXO8aEDH5nKXANdxhVny72LwwqGjBtnYoBo="
 
 ota:
   - platform: esphome
-    password: "de4d2d73b2a330717843abfd6a06254a"
+    password: "c8c3e69f905f209e827d6be3855fcc6c"
 
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
-  #use_address: first-8266.local
 
   # Enable fallback hotspot (captive portal) in case wifi connection fails
   ap:
-    ssid: "Main-Sensors Fallback Hotspot"
-    password: "Mpko0dbl3ETJ"
+    ssid: "Camper-Sensors2 Fallback Hotspot"
+    password: "ZSEFremxoXaM"
 
 captive_portal:
 
+number:
+  - platform: template
+    id: heart_beat2
+    name: "Heart Beat2"
+    internal: False
+    min_value: 0
+    max_value: 9
+    step: 1
+    update_interval: 10s
+    #optimistic: True #helps showing the entity in HA UI
+    lambda: 'return millis();'
+    set_action: #empty, required
+      then:
+
 sensor:
 - platform: uptime
+  name: "Up Time"
   id: uptime_counter
   internal: false
   update_interval: 10s
@@ -38,6 +52,7 @@ sensor:
     
 - platform: template
   id: heart_beat
+  name: "Heart Beat"
   internal: false
   update_interval: 15s
   lambda: 'return millis();'
