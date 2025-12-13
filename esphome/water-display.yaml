@@ -39,7 +39,7 @@ captive_portal:
 #    components: [ lvgl ] 
 
 debug:
-  update_interval: 5s
+  update_interval: 15s
 
 spi:
   clk_pin: GPIO6
@@ -80,33 +80,30 @@ display:
     invert_colors: False
 
 globals:
-  - id: time_counter
-    type: int
-    initial_value: '0'
-  - id: watertemp_lastupdate
-    type: uint32_t
-    initial_value: '0'
-    restore_value: False
   - id: watertemp_sanitized
     type: std::string
-    initial_value: '"-"'
-    restore_value: False
-  - id: watertemp_oddeven
-    type: bool
-    initial_value: 'false'
+    initial_value: '"."'
     restore_value: False
 
-time:
-  - platform: host
-    id: time_comp
+#time:
+#  - platform: host
+#    id: time_comp
 
-#interval:
-  #- interval: 1s
-    #then:
-      #- lambda: |-
-          #ESP_LOGI("interval", "Last update: %i", id(watertemp_lastupdate));
-          #ESP_LOGI("interval", "Current Time: %i", millis());
-          #ESP_LOGI("interval", "Elapsed Time: %i", millis() - id(watertemp_lastupdate));
+interval:
+  - interval: 500ms
+    then:
+      - lambda: |-
+          if (id(watertemp_sanitized) == ".") {
+            id(watertemp_sanitized) = "..";
+            id(update_display_temp).execute();
+          } else if (id(watertemp_sanitized) == "..") {
+            id(watertemp_sanitized) = "...";
+            id(update_display_temp).execute();
+          } else if (id(watertemp_sanitized) == "...") {
+            id(watertemp_sanitized) = ".";
+            id(update_display_temp).execute();
+          }
+          //ESP_LOGI("interval", "Last update: %i", id(watertemp_sanitized));
 
 number:
   - platform: template
@@ -124,13 +121,14 @@ text_sensor:
 sensor:
   #- !include { file: sensor_debug.yaml } 
   - platform: wifi_signal
-    # name: "WiFi Signal Sensor"
+    name: "WiFi Signal Sensor"
     internal: True
     id: wifi_signal_sensor
     update_interval: 30s
 
   - platform: uptime
     id: uptime_counter
+    name: "Up Time"
     update_interval: 15s
     accuracy_decimals: 0
 
@@ -142,35 +140,14 @@ sensor:
       then:
         - lambda: |-
             float v = id(ha_water_temp).state;
-            char buffer[8];
-            sprintf(buffer, "%.1f", v);
-            id(watertemp_sanitized) = std::string(buffer);
+            if (std::isnan(v)) {
+              id(watertemp_sanitized) = ".";
+            } else {
+              char buffer[8];
+              sprintf(buffer, "%.1f", v);
+              id(watertemp_sanitized) = std::string(buffer);
+            }
         - script.execute: update_display_temp
-    on_raw_value:
-      then:
-        - lambda: |-
-            id(watertemp_lastupdate) = millis();
-            ESP_LOGI("sensor", "Updated at: %i", millis());
-
-    on_value_range:
-      - above: 0.0
-        then:
-          #- lvgl.label.update:
-          #    id: battery_charging_discharging
-          #    text_color: 0x00FF00
-          #    text: "charging"
-      - below: 0.0
-        then:
-
-  - platform: homeassistant
-    id: provider_uptime
-    entity_id: sensor.first_8266_uptime
-    #internal: True
-    on_raw_value:
-      then:
-        - lambda: |-
-            id(watertemp_lastupdate) = millis();
-            ESP_LOGI("provider", "Updated at: %i", millis());
 
 <<: !include { file: water-display-lvgl.yaml }
 
